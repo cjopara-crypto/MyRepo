@@ -10,23 +10,37 @@ def index(request):
     """The home page for Learning Log."""
     return render(request, 'learning_logs/index.html')
 
-@login_required
 def topics(request):
-    """Show all topics."""
-    topics = Topic.objects.filter(owner=request.user).order_by('date_added')
-    context = {'topics': topics}
+    """Show all of curren user's topics, and public topics that belong to other users."""
+    # Get all appropriate topics.
+    # If a user is logged in, we get all of their topics, and all public topics from other users.
+    # If a user is not logged in, we get all public topics.
+    if request.user.is_authenticated:
+        topics = Topic.objects.filter(owner=request.user).order_by('date_added')
+        public_topics = (Topic.objects
+            .filter(public=True)
+            .exclude(owner=request.user)
+            .order_by('date_added'))
+    else:
+        topics = None
+        public_topics = Topic.objects.filter(public=True).order_by('date_added')
+
+    context = {'topics': topics, 'public_topics': public_topics}
     return render(request, 'learning_logs/topics.html', context)
 
-@login_required
 def topic(request, topic_id):
     """Show a single topic and all its entries."""
     topic = Topic.objects.get(id=topic_id)
     # Make sure the topic belongs to the current user.
-    if topic.owner != request.user:
+    is_owner = False
+    if request.user == topic.owner:
+        is_owner = True
+
+    if (topic.owner != request.user) and (not topic.public):
         raise Http404
     
     entries = topic.entry_set.order_by('-date_added')
-    context = {'topic': topic, 'entries': entries}
+    context = {'topic': topic, 'entries': entries, 'is_owner': is_owner}
     return render(request, 'learning_logs/topic.html', context)
 
 @login_required

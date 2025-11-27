@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # My apps
     'learning_logs',
-    'users',
+    'accounts',
 
     # Third party apps.
     'bootstrap4',
@@ -132,8 +132,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # My settings
 LOGIN_REDIRECT_URL = 'learning_logs:index'
 LOGOUT_REDIRECT_URL = 'learning_logs:index'
-LOGIN_URL = 'users:login'
-
-# Heroku settings.
-import django_heroku
-django_heroku.settings(locals())
+LOGIN_URL = 'accounts:login'
